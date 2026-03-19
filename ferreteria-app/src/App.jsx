@@ -1,32 +1,18 @@
-
-import React, { useState } from 'react'
-import Navbar from './components/Navbar'
-import Hero from './components/Hero'
-import Products from './components/Products'
-import About from './components/About'
-import Footer from './components/Footer'
-import LoginModal from './components/LoginModal'
+import React from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import Home from './pages/home'
+import AdminPanel from './pages/AdminPanel'
+import './App.css'  // <-- Importar el CSS aquí
 
 function App() {
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
-
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar onLoginClick={() => setIsLoginModalOpen(true)} />
-      
-      <main className="flex-grow">
-        <Hero />
-        <Products />
-        <About />
-      </main>
-
-      <Footer />
-
-      <LoginModal 
-        isOpen={isLoginModalOpen} 
-        onClose={() => setIsLoginModalOpen(false)} 
-      />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/admin" element={<AdminPanel />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
