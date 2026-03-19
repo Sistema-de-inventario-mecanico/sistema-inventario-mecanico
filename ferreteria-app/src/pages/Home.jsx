@@ -109,7 +109,7 @@ const Home = () => {
           <div className="space-y-8">
             {/* Hero Section */}
             <div className="bg-gradient-to-r from-primary to-primary-light text-white rounded-2xl p-8 md:p-12">
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">Taller Mecanico</h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">Taller Mecanico MODIFICADO</h1>
               <p className="text-xl mb-6">Las mejores herramientas y materiales para tus proyectos</p>
               <button 
                 onClick={() => setActiveSection('productos')}
