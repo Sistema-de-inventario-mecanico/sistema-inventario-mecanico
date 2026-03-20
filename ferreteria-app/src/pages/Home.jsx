@@ -84,15 +84,31 @@ const Home = () => {
     },
   ]
 
-  const handleLogin = (e) => {
-    e.preventDefault()
-    if (loginCredentials.username === 'admin' && loginCredentials.password === 'admin123') {
-      localStorage.setItem('isAdmin', 'true')
-      navigate('/admin')
-    } else {
-      alert('Credenciales incorrectas')
-    }
+  // En Home.jsx, modificar la función handleLogin:
+
+const handleLogin = (e) => {
+  e.preventDefault()
+  
+  if (loginCredentials.username === 'admin' && loginCredentials.password === 'admin123') {
+    localStorage.setItem('isAdmin', 'true')
+    navigate('/admin')
+  } 
+  else if (loginCredentials.username === 'oficina' && loginCredentials.password === 'oficina123') {
+    localStorage.setItem('isOficina', 'true')
+    navigate('/oficina')
   }
+  else if (loginCredentials.username === 'area' && loginCredentials.password === 'area123') {
+    localStorage.setItem('isArea', 'true')
+    navigate('/area')
+  }
+  else if (loginCredentials.username === 'trabajador' && loginCredentials.password === 'trabajador123') {
+    localStorage.setItem('isTrabajador', 'true')
+    navigate('/trabajador')
+  }
+  else {
+    alert('Credenciales incorrectas')
+  }
+}
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -109,8 +125,8 @@ const Home = () => {
           <div className="space-y-8">
             {/* Hero Section */}
             <div className="bg-gradient-to-r from-primary to-primary-light text-white rounded-2xl p-8 md:p-12">
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">Taller Mecanico MODIFICADO</h1>
-              <p className="text-xl mb-6">Las mejores herramientas y materiales para tus proyectos</p>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">758- Taller Mecanico. </h1>
+              <p className="text-xl mb-6">Las mejores herramientas y materiales para el mantemiento de tu auto y más.</p>
               <button 
                 onClick={() => setActiveSection('productos')}
                 className="bg-white text-primary px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
@@ -249,7 +265,7 @@ const Home = () => {
             <div className="bg-white rounded-xl shadow-lg p-8">
               <div className="prose max-w-none">
                 <p className="text-lg text-gray-700 mb-6">
-                  Somos una ferretería con más de 15 años de experiencia en el mercado, 
+                  Somos un taller con más de 15 años de experiencia en el mercado, 
                   comprometidos con ofrecer productos de la más alta calidad y un servicio 
                   excepcional a nuestros clientes.
                 </p>
@@ -257,13 +273,13 @@ const Home = () => {
                 <h2 className="text-2xl font-semibold mb-4">Nuestra Misión</h2>
                 <p className="text-gray-700 mb-6">
                   Proveer a nuestros clientes las mejores herramientas y materiales para 
-                  la construcción, garantizando calidad, durabilidad y los mejores precios 
+                  el servicio automotriz y mantenimiento , garantizando calidad, durabilidad y los mejores precios 
                   del mercado.
                 </p>
                 
                 <h2 className="text-2xl font-semibold mb-4">Nuestra Visión</h2>
                 <p className="text-gray-700 mb-6">
-                  Ser la ferretería líder en la región, reconocida por nuestra excelencia 
+                  Ser el mejor taller automotriz en la región, reconocido por nuestra excelencia 
                   en el servicio, variedad de productos y compromiso con la satisfacción 
                   del cliente.
                 </p>
@@ -317,7 +333,7 @@ const Home = () => {
         className="fixed top-4 right-4 bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors flex items-center gap-2 z-50"
       >
         <FiLogIn />
-        <span>Admin</span>
+        <span>Iniciar sesión</span>
       </button>
 
       {/* Sidebar Toggle Button (mobile) */}
