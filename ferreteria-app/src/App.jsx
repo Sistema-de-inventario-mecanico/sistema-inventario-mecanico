@@ -1,8 +1,10 @@
-import React from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import Home from './pages/home'
-import AdminPanel from './pages/AdminPanel'
-import './App.css'  // <-- Importar el CSS aquí
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Home from "./pages/Home";
+import AdminPanel from "./pages/AdminPanel";
+import OficinaPanel from "./pages/OficinaPanel";
+import AreaPanel from "./pages/AreaPanel";  // <-- Importar el nuevo panel
+import "./App.css";
 
 function App() {
   return (
@@ -10,10 +12,12 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/oficina" element={<OficinaPanel />} />
+        <Route path="/area" element={<AreaPanel />} />  {/* <-- Nueva ruta */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;
