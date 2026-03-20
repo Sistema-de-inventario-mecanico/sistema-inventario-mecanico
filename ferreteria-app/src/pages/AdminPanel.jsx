@@ -20,13 +20,13 @@ const Monitoreo = () => {
       <h1 className="text-3xl font-bold mb-8">Monitoreo</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-2">Ventas del Día</h3>
-          <p className="text-3xl font-bold text-primary">$1,234,567</p>
+          <h3 className="text-lg font-semibold mb-2">En prestamo</h3>
+          <p className="text-3xl font-bold text-primary">123</p>
           <p className="text-sm text-gray-500 mt-2">+12% vs ayer</p>
         </div>
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-2">Productos Vendidos</h3>
-          <p className="text-3xl font-bold text-primary">156</p>
+          <h3 className="text-lg font-semibold mb-2">Productos nuevos</h3>
+          <p className="text-3xl font-bold text-primary">15</p>
           <p className="text-sm text-gray-500 mt-2">23 transacciones</p>
         </div>
         <div className="bg-white rounded-lg shadow p-6">
@@ -284,7 +284,7 @@ const Usuario = () => {
 // Componente Módulos
 const Modulos = () => {
   const [modules, setModules] = useState([
-    { id: 1, name: 'Ventas', active: true },
+    { id: 1, name: 'Prestamos', active: true },
     { id: 2, name: 'Compras', active: true },
     { id: 3, name: 'Inventario', active: true },
     { id: 4, name: 'Reportes', active: false },
