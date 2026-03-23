@@ -26,9 +26,10 @@ def actualizar_matriculas():
         n = (u.first_name[0] if u.first_name else 'X').upper()
         a = (u.last_name[0] if u.last_name else 'X').upper()
         r = roleCodes.get(u.rol, '04')
-        progressive = str(u.id).zfill(4)
+        year = u.date_joined.strftime('%y') if u.date_joined else '26'
+        progressive = str(u.id)
         
-        new_username = f"{n}{a}{r}{progressive}"
+        new_username = f"{n}{a}{r}{year}{progressive}"
         
         if u.username != new_username:
             print(f"Actualizando usuario ID {u.id}: {u.username} -> {new_username}")

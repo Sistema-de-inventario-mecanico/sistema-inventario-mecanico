@@ -47,7 +47,8 @@ export default function AdminUsuarios() {
 
     const generarMatricula = (n, a, r) => {
         const baseId = usuarios.length > 0 ? Math.max(...usuarios.map(u => u.id)) + 1 : 1;
-        return `${(n.charAt(0) || 'X').toUpperCase()}${(a.charAt(0) || 'X').toUpperCase()}${roleCodes[r] || '04'}${baseId.toString().padStart(4, '0')}`;
+        const currentYear = new Date().getFullYear().toString().slice(-2);
+        return `${(n.charAt(0) || 'X').toUpperCase()}${(a.charAt(0) || 'X').toUpperCase()}${roleCodes[r] || '04'}${currentYear}${baseId}`;
     };
 
     const handleSubmit = async (e) => {
@@ -95,7 +96,8 @@ export default function AdminUsuarios() {
     if (loading) return <div className="text-center p-10 text-gray-500">Cargando personal...</div>;
 
     const previewBaseId = usuarios.length > 0 ? Math.max(...usuarios.map(u => u.id)) + 1 : 1;
-    const preview = `${(form.first_name?.charAt(0) || 'X').toUpperCase()}${(form.last_name?.charAt(0) || 'X').toUpperCase()}${roleCodes[form.rol] || '04'}${previewBaseId.toString().padStart(4, '0')}`;
+    const currentYearPreview = new Date().getFullYear().toString().slice(-2);
+    const preview = `${(form.first_name?.charAt(0) || 'X').toUpperCase()}${(form.last_name?.charAt(0) || 'X').toUpperCase()}${roleCodes[form.rol] || '04'}${currentYearPreview}${previewBaseId}`;
 
     return (
         <div className="space-y-6">
