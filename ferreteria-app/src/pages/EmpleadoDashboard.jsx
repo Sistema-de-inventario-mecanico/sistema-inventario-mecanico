@@ -89,23 +89,23 @@ export default function EmpleadoDashboard() {
                             <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1">{mat.nombre}</h3>
                             <p className="text-sm text-gray-500 line-clamp-2 flex-grow mb-4">{mat.descripcion || 'Sin descripción.'}</p>
 
-                            {/* Quantity selector for CONSUMIBLE and UNIDAD */}
-                            {canSelectQty && !agotado && (
-                                <div className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 mb-3 border border-gray-200">
-                                    <span className="text-xs text-gray-500 font-medium">Cantidad:</span>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => setCantidades(prev => ({ ...prev, [mat.id]: Math.max(1, (prev[mat.id] || 1) - 1) }))}
-                                            className="w-7 h-7 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-200 flex items-center justify-center font-bold text-sm transition-colors"
-                                        >−</button>
-                                        <span className="w-6 text-center font-bold text-dark text-sm">{cantidad}</span>
-                                        <button
-                                            onClick={() => setCantidades(prev => ({ ...prev, [mat.id]: Math.min(mat.stock_actual, (prev[mat.id] || 1) + 1) }))}
-                                            className="w-7 h-7 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-200 flex items-center justify-center font-bold text-sm transition-colors"
-                                        >+</button>
-                                    </div>
-                                </div>
-                            )}
+                             {/* Quantity selector for CONSUMIBLE and UNIDAD */}
+                             {canSelectQty && !agotado && (
+                                 <div className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 mb-3 border border-gray-200">
+                                     <span className="text-xs text-gray-500 font-medium">Cantidad:</span>
+                                     <div className="flex items-center gap-2">
+                                         <button
+                                             onClick={() => setCantidades(prev => ({ ...prev, [mat.id]: Math.max(1, (prev[mat.id] || 1) - 1) }))}
+                                             className="w-7 h-7 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-200 flex items-center justify-center font-bold text-sm transition-colors"
+                                         >−</button>
+                                         <span className="w-6 text-center font-bold text-dark text-sm">{cantidad}</span>
+                                         <button
+                                             onClick={() => setCantidades(prev => ({ ...prev, [mat.id]: Math.min(mat.stock_actual, (prev[mat.id] || 1) + 1) }))}
+                                             className="w-7 h-7 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-200 flex items-center justify-center font-bold text-sm transition-colors"
+                                         >+</button>
+                                     </div>
+                                 </div>
+                             )}
 
                             <button
                                 onClick={() => openConfirmModal(mat)}

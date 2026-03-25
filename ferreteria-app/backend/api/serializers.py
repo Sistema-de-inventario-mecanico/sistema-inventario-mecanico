@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Usuario, Material, Solicitud, MovimientoStock
+from .models import Usuario, Material, Solicitud, MovimientoStock, Compra, HistorialProductoMalo
 
 class UsuarioSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
@@ -46,7 +46,22 @@ class SolicitudSerializer(serializers.ModelSerializer):
     class Meta:
         model = Solicitud
         fields = '__all__'
-        read_only_fields = ['empleado', 'fecha_solicitud', 'fecha_aprobacion', 'fecha_entrega', 'fecha_devolucion', 'encargado_area', 'encargado_oficina']
+        read_only_fields = [
+            'empleado', 'fecha_solicitud', 'fecha_aprobacion', 'fecha_entrega',
+            'fecha_devolucion', 'fecha_cancelacion', 'encargado_area', 'encargado_oficina',
+            'aviso_devolucion', 'fecha_aviso_devolucion'
+        ]
+
+    def validate(self, data):
+        material = data.get('material')
+        cantidad = data.get('cantidad', 0)
+        
+        if cantidad > material.stock_actual:
+            raise serializers.ValidationError({
+                "cantidad": f"La cantidad solicitada ({cantidad}) supera el stock disponible ({material.stock_actual})."
+            })
+            
+        return data
 
 class MovimientoStockSerializer(serializers.ModelSerializer):
     material_detalle = MaterialSerializer(source='material', read_only=True)
@@ -54,4 +69,25 @@ class MovimientoStockSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MovimientoStock
+        fields = '__all__'
+
+class CompraSerializer(serializers.ModelSerializer):
+    material_detalle = MaterialSerializer(source='material', read_only=True)
+    registrado_por_detalle = UsuarioSerializer(source='registrado_por', read_only=True)
+    recibido_por_detalle = UsuarioSerializer(source='recibido_por', read_only=True)
+
+    class Meta:
+        model = Compra
+        fields = '__all__'
+        read_only_fields = [
+            'registrado_por', 'fecha_compra', 'recibido_por', 'fecha_recepcion',
+            'material_nombre'
+        ]
+
+class HistorialProductoMaloSerializer(serializers.ModelSerializer):
+    material_detalle = MaterialSerializer(source='material', read_only=True)
+    reportado_por_detalle = UsuarioSerializer(source='reportado_por', read_only=True)
+
+    class Meta:
+        model = HistorialProductoMalo
         fields = '__all__'

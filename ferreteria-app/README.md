@@ -59,7 +59,7 @@ source venv/bin/activate
 venv\Scripts\activate
 
 # Instalar dependencias 
-pip install -r backend/requirements.txt  # (O instala manualmente django, djangorestframework, psycopg2, python-dotenv, cors-headers, etc)
+pip install -r backend/requerimientos.txt  # (O instala manualmente django, djangorestframework, psycopg2, python-dotenv, cors-headers, etc)
 
 # Aplicar las migraciones a la base de datos
 python backend/manage.py migrate

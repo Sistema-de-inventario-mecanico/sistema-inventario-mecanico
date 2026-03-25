@@ -19,6 +19,8 @@ const ROLE_NAV_LINKS = {
         { name: 'Monitoreo', path: '/', icon: ChartBarIcon },
         { name: 'Stock / Inventario', path: '/stock', icon: WrenchIcon },
         { name: 'Compras', path: '/compras', icon: ShoppingBagIcon },
+        { name: 'Recibir Compras', path: '/recibir-compras', icon: InboxArrowDownIcon },
+        { name: 'Historial Defectos', path: '/historial-defectos', icon: ClipboardDocumentCheckIcon },
         { name: 'Control Ingreso/Egreso', path: '/control', icon: InboxArrowDownIcon },
         { name: 'Usuarios', path: '/usuarios', icon: UsersIcon },
         { name: 'Entregar / Recibir', path: '/encargado-oficina', icon: ClipboardDocumentCheckIcon },
@@ -27,7 +29,7 @@ const ROLE_NAV_LINKS = {
     ENCARGADO_OFICINA: [
         { name: 'Disposición del Stock', path: '/oficina-stock', icon: WrenchIcon },
         { name: 'Entregar Material', path: '/', icon: ClipboardDocumentCheckIcon },
-        { name: 'Recibir/Devoluciones', path: '/recepcion', icon: InboxArrowDownIcon },
+        { name: 'Recibir Compras', path: '/recibir-compras', icon: InboxArrowDownIcon },
     ],
     ENCARGADO_AREA: [
         { name: 'Solicitudes Pendientes', path: '/', icon: ClipboardDocumentCheckIcon },

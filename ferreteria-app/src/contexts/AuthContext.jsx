@@ -10,15 +10,24 @@ export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const token = sessionStorage.getItem('access_token');
-        if (token) {
-            // Try to restore user from sessionStorage first (fast)
-            const storedUser = sessionStorage.getItem('user');
-            if (storedUser) {
-                try {
-                    setUser(JSON.parse(storedUser));
-                } catch {
-                    sessionStorage.removeItem('user');
+        const token = localStorage.getItem('access_token');
+        const loginDate = localStorage.getItem('login_date');
+
+        if (token && loginDate) {
+            const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+            const now = new Date().getTime();
+            const then = parseInt(loginDate, 10);
+
+            if (now - then > ONE_WEEK) {
+                logout();
+            } else {
+                const storedUser = localStorage.getItem('user');
+                if (storedUser) {
+                    try {
+                        setUser(JSON.parse(storedUser));
+                    } catch {
+                        localStorage.removeItem('user');
+                    }
                 }
             }
         }
@@ -30,22 +39,26 @@ export const AuthProvider = ({ children }) => {
             // Step 1: Get JWT tokens
             const response = await api.post('token/', { username, password });
             const { access, refresh } = response.data;
-            sessionStorage.setItem('access_token', access);
-            sessionStorage.setItem('refresh_token', refresh);
+            const now = new Date().getTime();
+
+            localStorage.setItem('access_token', access);
+            localStorage.setItem('refresh_token', refresh);
+            localStorage.setItem('login_date', now.toString());
 
             // Step 2: Fetch the current user's profile using the /me endpoint
             const meResp = await api.get('usuarios/me/');
             const currentUser = meResp.data;
 
-            sessionStorage.setItem('user', JSON.stringify(currentUser));
+            localStorage.setItem('user', JSON.stringify(currentUser));
             setUser(currentUser);
             navigate('/');
             return { success: true };
         } catch (error) {
             // Clean up if login fails
-            sessionStorage.removeItem('access_token');
-            sessionStorage.removeItem('refresh_token');
-            sessionStorage.removeItem('user');
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('login_date');
 
             let msg = 'Error de conexión con el servidor';
             if (error.response) {
@@ -60,9 +73,10 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
-        sessionStorage.removeItem('access_token');
-        sessionStorage.removeItem('refresh_token');
-        sessionStorage.removeItem('user');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('login_date');
         setUser(null);
         navigate('/login');
     };
