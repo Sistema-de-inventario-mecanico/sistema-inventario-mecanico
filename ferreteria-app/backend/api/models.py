@@ -123,7 +123,6 @@ class MovimientoStock(models.Model):
     def __str__(self):
         return f"{self.tipo} - {self.material.nombre} ({self.cantidad})"
 
-
 class EstadoCompra(models.TextChoices):
     PENDIENTE = 'PENDIENTE', 'Pendiente de recibir'
     RECIBIDA = 'RECIBIDA', 'Recibida'
@@ -191,4 +190,3 @@ class HistorialProductoMalo(models.Model):
 
     def __str__(self):
         return f"Defecto {self.id} - {self.material_nombre} ({self.cantidad})"
-

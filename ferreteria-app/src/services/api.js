@@ -42,6 +42,8 @@ api.interceptors.response.use(
             } catch (err) {
                 localStorage.removeItem('access_token');
                 localStorage.removeItem('refresh_token');
+                localStorage.removeItem('user');
+                localStorage.removeItem('login_date');
                 window.location.href = '/login';
             }
         }

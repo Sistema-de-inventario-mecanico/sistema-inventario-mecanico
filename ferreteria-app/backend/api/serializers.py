@@ -53,9 +53,15 @@ class SolicitudSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, data):
+        if self.instance: # Skip validation on update
+            return data
+            
         material = data.get('material')
         cantidad = data.get('cantidad', 0)
         
+        if not material:
+            return data
+            
         if cantidad > material.stock_actual:
             raise serializers.ValidationError({
                 "cantidad": f"La cantidad solicitada ({cantidad}) supera el stock disponible ({material.stock_actual})."
@@ -70,7 +76,6 @@ class MovimientoStockSerializer(serializers.ModelSerializer):
     class Meta:
         model = MovimientoStock
         fields = '__all__'
-
 
 class CompraSerializer(serializers.ModelSerializer):
     material_detalle = MaterialSerializer(source='material', read_only=True)
@@ -92,4 +97,3 @@ class HistorialProductoMaloSerializer(serializers.ModelSerializer):
     class Meta:
         model = HistorialProductoMalo
         fields = '__all__'
-

@@ -17,7 +17,6 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
             return True
         if not request.user or not request.user.is_authenticated:
             return False
-        # Allow users with the custom ADMIN role OR Django staff/superusers
         user_rol = getattr(request.user, 'rol', None)
         return user_rol == 'ADMIN' or request.user.is_staff or request.user.is_superuser
 
@@ -27,19 +26,19 @@ class IsAdminOrOficina(permissions.BasePermission):
             return False
         user_rol = getattr(request.user, 'rol', None)
         return user_rol in ['ADMIN', 'ENCARGADO_OFICINA'] or request.user.is_staff or request.user.is_superuser
+
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    # Only admin can create or modify users
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return [permissions.IsAuthenticated(), IsAdminUserOrReadOnly()]
         return super().get_permissions()
 
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def me(self, request):
-        """Returns the profile of the currently logged-in user."""
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
@@ -66,13 +65,12 @@ class MaterialViewSet(viewsets.ModelViewSet):
         for req in active_requests:
             req.estado = EstadoSolicitud.CANCELADA
             req.fecha_cancelacion = timezone.now()
-            # If it's tools/consumables ENTREGADA, we just cancel it to clear the "Por Recibir" queue
             req.save()
             
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def ajustar_stock(self, request, pk=None):
-        """Register a manual stock movement (INGRESO or EGRESO) and update material stock."""
         material = self.get_object()
         tipo = request.data.get('tipo')
         cantidad = int(request.data.get('cantidad', 0))
@@ -80,25 +78,21 @@ class MaterialViewSet(viewsets.ModelViewSet):
 
         if tipo not in ['INGRESO', 'EGRESO']:
             return Response({'error': 'tipo debe ser INGRESO o EGRESO'}, status=status.HTTP_400_BAD_REQUEST)
+        
         if cantidad <= 0:
             return Response({'error': 'cantidad debe ser mayor a 0'}, status=status.HTTP_400_BAD_REQUEST)
         if tipo == 'EGRESO' and material.stock_actual < cantidad:
             return Response({'error': 'Stock insuficiente para el egreso'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Update stock
         if tipo == 'INGRESO':
             material.stock_actual += cantidad
         else:
             material.stock_actual -= cantidad
         material.save()
 
-        # Register movement in history
         MovimientoStock.objects.create(
-            material=material,
-            usuario=request.user,
-            tipo=tipo,
-            cantidad=cantidad,
-            notas=notas
+            material=material, usuario=request.user,
+            tipo=tipo, cantidad=cantidad, notas=notas
         )
         return Response({'status': f'{tipo} registrado', 'nuevo_stock': material.stock_actual})
 
@@ -183,10 +177,10 @@ class SolicitudViewSet(viewsets.ModelViewSet):
         solicitud = self.get_object()
         if request.user.rol not in ['ADMIN', 'ENCARGADO_OFICINA']:
             return Response({'error': 'No auth'}, status=status.HTTP_403_FORBIDDEN)
+        
         if solicitud.estado != 'APROBADA':
             return Response({'error': 'No está aprobada'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Restar stock
         material = solicitud.material
         if material.stock_actual < solicitud.cantidad:
             return Response({'error': 'Stock insuficiente'}, status=status.HTTP_400_BAD_REQUEST)
@@ -194,12 +188,9 @@ class SolicitudViewSet(viewsets.ModelViewSet):
         material.stock_actual -= solicitud.cantidad
         material.save()
 
-        # Registrar movimiento de egreso
         MovimientoStock.objects.create(
-            material=material,
-            usuario=request.user,
-            tipo='EGRESO',
-            cantidad=solicitud.cantidad,
+            material=material, usuario=request.user,
+            tipo='EGRESO', cantidad=solicitud.cantidad,
             notas=f"Entrega de solicitud {solicitud.id}"
         )
 
@@ -214,12 +205,12 @@ class SolicitudViewSet(viewsets.ModelViewSet):
         solicitud = self.get_object()
         if request.user.rol not in ['ADMIN', 'ENCARGADO_OFICINA']:
             return Response({'error': 'No auth'}, status=status.HTTP_403_FORBIDDEN)
+        
         if solicitud.estado != 'ENTREGADA':
             return Response({'error': 'No ha sido entregada'}, status=status.HTTP_400_BAD_REQUEST)
 
         material = solicitud.material
         categoria = material.categoria
-
         motivo = request.data.get('motivo_devolucion', '')
 
         if categoria == CategoriaMaterial.HERRAMIENTA:

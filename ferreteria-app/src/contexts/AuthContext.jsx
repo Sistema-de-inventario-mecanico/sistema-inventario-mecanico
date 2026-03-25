@@ -9,6 +9,15 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
+    const logout = () => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('login_date');
+        setUser(null);
+        navigate('/login');
+    };
+
     useEffect(() => {
         const token = localStorage.getItem('access_token');
         const loginDate = localStorage.getItem('login_date');
@@ -70,15 +79,6 @@ export const AuthProvider = ({ children }) => {
             }
             return { success: false, error: msg };
         }
-    };
-
-    const logout = () => {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('login_date');
-        setUser(null);
-        navigate('/login');
     };
 
     return (
