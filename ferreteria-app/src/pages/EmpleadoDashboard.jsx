@@ -32,7 +32,7 @@ export default function EmpleadoDashboard() {
     const openConfirmModal = (mat) => {
         const cantidad = getCantidad(mat);
         if (cantidad < 1 || cantidad > mat.stock_actual) {
-            showToast(`Cantidad inválida. Stock disponible: ${mat.stock_actual}`, 'warning');
+            showToast(\`Cantidad inválida. Stock disponible: \${mat.stock_actual}\`, 'warning');
             return;
         }
         setSelectedMaterial({ mat, cantidad });
@@ -43,7 +43,7 @@ export default function EmpleadoDashboard() {
         const { mat, cantidad } = selectedMaterial;
         try {
             await api.post('solicitudes/', { material: mat.id, cantidad });
-            showToast(`¡Solicitud de ${cantidad} × "${mat.nombre}" enviada! Revisa el estado en "Mis Solicitudes".`, 'success');
+            showToast(\`¡Solicitud de \${cantidad} × "\${mat.nombre}" enviada! Revisa el estado en "Mis Solicitudes".\`, 'success');
             setSelectedMaterial(null);
             loadData();
         } catch (error) {
@@ -78,48 +78,48 @@ export default function EmpleadoDashboard() {
                     return (
                         <div key={mat.id} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col hover:shadow-md transition-shadow">
                             <div className="flex justify-between items-start mb-4">
-                                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${catColors[mat.categoria]}`}>
+                                <span className={\`text-xs font-semibold px-2.5 py-1 rounded-full \${catColors[mat.categoria]}\`}>
                                     {mat.categoria}
                                 </span>
-                                <span className={`text-sm font-bold ${agotado ? 'text-red-500' : 'text-green-600'}`}>
-                                    {agotado ? 'Agotado' : `${mat.stock_actual} disp.`}
+                                <span className={\`text-sm font-bold \${agotado ? 'text-red-500' : 'text-green-600'}\`}>
+                                    {agotado ? 'Agotado' : \`\${mat.stock_actual} disp.\`}
                                 </span>
                             </div>
 
                             <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1">{mat.nombre}</h3>
                             <p className="text-sm text-gray-500 line-clamp-2 flex-grow mb-4">{mat.descripcion || 'Sin descripción.'}</p>
 
-                             {/* Quantity selector for CONSUMIBLE and UNIDAD */}
-                             {canSelectQty && !agotado && (
-                                 <div className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 mb-3 border border-gray-200">
-                                     <span className="text-xs text-gray-500 font-medium">Cantidad:</span>
-                                     <div className="flex items-center gap-2">
-                                         <button
-                                             onClick={() => setCantidades(prev => ({ ...prev, [mat.id]: Math.max(1, (prev[mat.id] || 1) - 1) }))}
-                                             className="w-7 h-7 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-200 flex items-center justify-center font-bold text-sm transition-colors"
-                                         >−</button>
-                                         <span className="w-6 text-center font-bold text-dark text-sm">{cantidad}</span>
-                                         <button
-                                             onClick={() => setCantidades(prev => ({ ...prev, [mat.id]: Math.min(mat.stock_actual, (prev[mat.id] || 1) + 1) }))}
-                                             className="w-7 h-7 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-200 flex items-center justify-center font-bold text-sm transition-colors"
-                                         >+</button>
-                                     </div>
-                                 </div>
-                             )}
+                            {/* Quantity selector for CONSUMIBLE and UNIDAD */}
+                            {canSelectQty && !agotado && (
+                                <div className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 mb-3 border border-gray-200">
+                                    <span className="text-xs text-gray-500 font-medium">Cantidad:</span>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => setCantidades(prev => ({ ...prev, [mat.id]: Math.max(1, (prev[mat.id] || 1) - 1) }))}
+                                            className="w-7 h-7 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-200 flex items-center justify-center font-bold text-sm transition-colors"
+                                        >−</button>
+                                        <span className="w-6 text-center font-bold text-dark text-sm">{cantidad}</span>
+                                        <button
+                                            onClick={() => setCantidades(prev => ({ ...prev, [mat.id]: Math.min(mat.stock_actual, (prev[mat.id] || 1) + 1) }))}
+                                            className="w-7 h-7 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-200 flex items-center justify-center font-bold text-sm transition-colors"
+                                        >+</button>
+                                    </div>
+                                </div>
+                            )}
 
                             <button
                                 onClick={() => openConfirmModal(mat)}
                                 disabled={agotado}
-                                className={`w-full flex items-center justify-center space-x-2 py-2.5 rounded-xl font-medium text-sm transition-colors ${
+                                className={\`w-full flex items-center justify-center space-x-2 py-2.5 rounded-xl font-medium text-sm transition-colors \${
                                     agotado
                                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                         : 'bg-primary/10 text-primary hover:bg-primary hover:text-white'
-                                }`}
+                                }\`}
                             >
                                 <PlusIcon className="w-4 h-4" />
                                 <span>
                                     {canSelectQty
-                                        ? `Solicitar ${cantidad} ${mat.categoria === 'UNIDAD' ? 'pcs.' : 'u.'}`
+                                        ? \`Solicitar \${cantidad} \${mat.categoria === 'UNIDAD' ? 'pcs.' : 'u.'}\`
                                         : 'Solicitar'}
                                 </span>
                             </button>
@@ -143,9 +143,9 @@ export default function EmpleadoDashboard() {
                             ¿Estás seguro de que deseas solicitar <strong>{selectedMaterial.cantidad} {selectedMaterial.mat.categoria === 'UNIDAD' ? 'pcs.' : 'u.'}</strong> de <strong>{selectedMaterial.mat.nombre}</strong>?
                         </p>
                         <div className="flex gap-3 pt-4">
-                            <button onClick={() => setSelectedMaterial(null)} className="cancel-btn">Cancelar</button>
-                            <button onClick={confirmarSolicitud} className="login-btn bg-primary hover:bg-primary-dark">
-                                Confirmar Solicitud
+                            <button onClick={() => setSelectedMaterial(null)} className="cancel-btn flex-1">Cancelar</button>
+                            <button onClick={confirmarSolicitud} className="login-btn flex-1">
+                                Confirmar
                             </button>
                         </div>
                     </div>

@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
                 if (error.response.status === 401) {
                     msg = 'Matrícula o contraseña incorrecta';
                 } else {
-                    msg = `Error del servidor (${error.response.status})`;
+                    msg = \`Error del servidor (\${error.response.status})\`;
                 }
             }
             return { success: false, error: msg };

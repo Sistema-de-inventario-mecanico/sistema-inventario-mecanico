@@ -5,6 +5,7 @@ class UsuarioManager(UserManager):
     def create_superuser(self, username, email=None, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+        # Asignar automáticamente el rol de ADMIN al crear superusuario por consola
         extra_fields.setdefault('rol', 'ADMIN')
 
         if extra_fields.get('is_staff') is not True:
@@ -122,6 +123,7 @@ class MovimientoStock(models.Model):
     def __str__(self):
         return f"{self.tipo} - {self.material.nombre} ({self.cantidad})"
 
+
 class EstadoCompra(models.TextChoices):
     PENDIENTE = 'PENDIENTE', 'Pendiente de recibir'
     RECIBIDA = 'RECIBIDA', 'Recibida'
@@ -189,3 +191,4 @@ class HistorialProductoMalo(models.Model):
 
     def __str__(self):
         return f"Defecto {self.id} - {self.material_nombre} ({self.cantidad})"
+

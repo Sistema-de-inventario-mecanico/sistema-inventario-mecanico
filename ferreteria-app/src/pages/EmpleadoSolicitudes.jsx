@@ -17,6 +17,7 @@ export default function EmpleadoSolicitudes() {
     const fetchSolicitudes = async () => {
         try {
             const res = await api.get('solicitudes/');
+            // The API response now orders by date, but we filter for current user
             const misSolicitudes = res.data.filter(s => s.empleado_detalle.id === user.id);
             setSolicitudes(misSolicitudes);
         } catch (error) {
@@ -40,7 +41,7 @@ export default function EmpleadoSolicitudes() {
         if (!ok) return;
         
         try {
-            await api.post(`solicitudes/${id}/cancelar/`);
+            await api.post(\`solicitudes/\${id}/cancelar/\`);
             showToast('Solicitud cancelada correctamente.', 'success');
             fetchSolicitudes();
         } catch (err) {
@@ -51,7 +52,7 @@ export default function EmpleadoSolicitudes() {
     const handleAvisoDevolucion = async (e) => {
         e.preventDefault();
         try {
-            await api.post(`solicitudes/${showAvisoModal.id}/avisar_devolucion/`, {
+            await api.post(\`solicitudes/\${showAvisoModal.id}/avisar_devolucion/\`, {
                 cantidad_aviso: cantAviso
             });
             showToast('Aviso de devolución enviado al encargado.', 'success');
@@ -109,7 +110,7 @@ export default function EmpleadoSolicitudes() {
                                     <td className="px-6 py-4 text-gray-600 font-bold">{sol.cantidad}</td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col gap-1 items-start">
-                                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${getStatusStyle(sol.estado)}`}>
+                                            <span className={\`px-2.5 py-1 rounded-full text-[10px] font-bold border \${getStatusStyle(sol.estado)}\`}>
                                                 {sol.estado}
                                             </span>
                                             {sol.aviso_devolucion && (
@@ -119,7 +120,7 @@ export default function EmpleadoSolicitudes() {
                                             )}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-gray-600 text-xs text-mono">
+                                    <td className="px-6 py-4 text-gray-600 text-xs font-mono">
                                         {new Date(sol.fecha_solicitud).toLocaleString('es-MX', { dateStyle: 'short' })}
                                     </td>
                                     <td className="px-6 py-4">
@@ -127,7 +128,8 @@ export default function EmpleadoSolicitudes() {
                                             {sol.estado === 'PENDIENTE' && (
                                                 <button 
                                                     onClick={() => handleCancelar(sol.id)}
-                                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors title='Cancelar Pedido'"
+                                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                    title="Cancelar Pedido"
                                                 >
                                                     <XMarkIcon className="w-5 h-5" />
                                                 </button>
@@ -136,7 +138,7 @@ export default function EmpleadoSolicitudes() {
                                                 <button 
                                                     onClick={() => { setShowAvisoModal(sol); setCantAviso(1); }}
                                                     className="flex items-center gap-1 px-3 py-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-xs font-bold transition-colors"
-                title='Avisar que sobró material'
+                                                    title="Avisar que sobró material"
                                                 >
                                                     <ArrowPathIcon className="w-4 h-4" />
                                                     Sobrante
@@ -151,10 +153,69 @@ export default function EmpleadoSolicitudes() {
                 </div>
             </div>
 
-            {/* View More Modal (mobile fallback/details) */}
+            {/* Mobile Cards View */}
+            <div className="md:hidden space-y-4">
+                {solicitudes.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500 bg-white rounded-xl border border-gray-100 shadow-sm">
+                        No has realizado ninguna solicitud aún.
+                    </div>
+                ) : solicitudes.map((sol) => (
+                    <div key={sol.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-3">
+                        <div className="flex justify-between items-start">
+                            <div className="space-y-1">
+                                <p className="font-bold text-gray-900">{sol.material_detalle.nombre}</p>
+                                <p className="text-xs text-gray-500">Fecha: {new Date(sol.fecha_solicitud).toLocaleDateString()}</p>
+                            </div>
+                            <span className={\`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border \${getStatusStyle(sol.estado)}\`}>
+                                {sol.estado}
+                            </span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                             <p className="font-bold text-gray-700">{sol.cantidad} ui</p>
+                             <div className="flex gap-2">
+                                {sol.estado === 'PENDIENTE' && (
+                                    <button onClick={() => handleCancelar(sol.id)} className="text-red-500 font-bold px-2 py-1 border border-red-50 rounded hover:bg-red-50">Cancelar</button>
+                                )}
+                                <button onClick={() => setViewMoreSol(sol)} className="px-3 py-1 bg-gray-50 text-primary font-medium rounded-lg text-xs border border-gray-200">Ver Detalles</button>
+                             </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* View More Modal */}
             {viewMoreSol && (
-                <PortalModal title="Detalles" onClose={() => setViewMoreSol(null)}>
-                    {/* ... (existing details modal content, can be updated later) */}
+                <PortalModal title="Detalles de la Solicitud" onClose={() => setViewMoreSol(null)}>
+                    <div className="space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-center">
+                            <span className="text-xs font-mono text-gray-500 mb-1 block">ID: #{viewMoreSol.id}</span>
+                            <h3 className="text-xl font-bold text-gray-900">{viewMoreSol.material_detalle.nombre}</h3>
+                            <span className={\`inline-block mt-2 px-3 py-1 rounded-full text-xs font-bold border \${getStatusStyle(viewMoreSol.estado)}\`}>
+                                {viewMoreSol.estado}
+                            </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <p className="text-sm text-gray-500">Cantidad</p>
+                                <p className="font-bold text-lg">{viewMoreSol.cantidad}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-500">Fecha</p>
+                                <p className="font-medium">{new Date(viewMoreSol.fecha_solicitud).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        {viewMoreSol.aviso_devolucion && (
+                             <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                                <p className="text-xs text-indigo-700 font-bold uppercase mb-1">Aviso de Devolución</p>
+                                <p className="text-sm text-indigo-900">Reportaste que vas a regresar <strong>{viewMoreSol.cantidad_aviso_devolucion} ui</strong>.</p>
+                             </div>
+                        )}
+                        <div className="pt-2">
+                            <button onClick={() => setViewMoreSol(null)} className="w-full py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors">
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
                 </PortalModal>
             )}
 

@@ -37,7 +37,7 @@ export default function AdminCompras() {
 
         const ok = await confirmDialog(
             'Confirmar Compra',
-            `¿Estás seguro de registrar esta orden de compra por ${form.cantidad_pedida} unidades de ${mat.nombre}?`
+            \`¿Estás seguro de registrar esta orden de compra por \${form.cantidad_pedida} unidades de \${mat.nombre}?\`
         );
         if (!ok) return;
 
@@ -49,7 +49,7 @@ export default function AdminCompras() {
                 notas: form.notas,
             });
             setShowModal(false);
-            showToast(`Orden de compra para "${mat.nombre}" registrada. Pendiente de recibir por oficina.`, 'success');
+            showToast(\`Orden de compra para "\${mat.nombre}" registrada. Pendiente de recibir por oficina.\`, 'success');
             setForm({ material: '', cantidad_pedida: 1, proveedor: '', notas: '' });
             load();
         } catch (err) {
@@ -61,12 +61,12 @@ export default function AdminCompras() {
     const handleCancelar = async (id, nombre) => {
         const ok = await confirmDialog(
             'Cancelar Orden',
-            `¿Estás seguro de cancelar la orden de compra de "${nombre}"? Esta acción no se puede deshacer.`
+            \`¿Estás seguro de cancelar la orden de compra de "\${nombre}"? Esta acción no se puede deshacer.\`
         );
         if (!ok) return;
 
         try {
-            await api.post(`compras/${id}/cancelar/`);
+            await api.post(\`compras/\${id}/cancelar/\`);
             showToast('Orden de compra cancelada.', 'success');
             load();
         } catch (err) {
@@ -104,7 +104,7 @@ export default function AdminCompras() {
                 {materiales.slice(0, 4).map(m => (
                     <div key={m.id} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
                         <p className="text-xs text-gray-500 uppercase font-semibold tracking-wide truncate">{m.nombre}</p>
-                        <p className={`text-3xl font-bold mt-1 ${m.stock_actual <= m.stock_min ? 'text-red-500' : 'text-dark'}`}>{m.stock_actual}</p>
+                        <p className={\`text-3xl font-bold mt-1 \${m.stock_actual <= m.stock_min ? 'text-red-500' : 'text-dark'}\`}>{m.stock_actual}</p>
                         <p className="text-xs text-gray-400 mt-0.5">Mín: {m.stock_min}</p>
                     </div>
                 ))}
@@ -128,16 +128,16 @@ export default function AdminCompras() {
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                         {compras.map(c => (
-                            <tr key={c.id} className="hover:bg-gray-50/50">
+                            <tr key={c.id} className="hover:bg-gray-50/50 transition-colors">
                                 <td className="px-6 py-4 font-medium text-gray-900">{c.material_nombre}</td>
                                 <td className="px-6 py-4 font-bold text-gray-700">{c.cantidad_pedida}</td>
                                 <td className="px-6 py-4 text-xs font-bold">
-                                    <span className={`px-2 py-1 rounded-full text-[10px] ${getStatusStyle(c.estado)}`}>
+                                    <span className={\`px-2 py-1 rounded-full text-[10px] \${getStatusStyle(c.estado)}\`}>
                                         {c.estado}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-gray-500 text-xs">{new Date(c.fecha_compra).toLocaleString('es-MX')}</td>
-                                <td className="px-6 py-4 text-gray-400 text-sm max-w-xs truncate">{c.proveedor || '—'} {c.notes && ` | ${c.notes}`}</td>
+                                <td className="px-6 py-4 text-gray-400 text-sm max-w-xs truncate">{c.proveedor || '—'} {c.notes && \` | \${c.notes}\`}</td>
                                 <td className="px-6 py-4 text-center">
                                     {c.estado === 'PENDIENTE' && (
                                         <button 
@@ -156,35 +156,39 @@ export default function AdminCompras() {
                 {compras.length === 0 && <div className="text-center py-12 text-gray-400">Sin órdenes registradas.</div>}
             </div>
 
-            {/* View More Modal (placeholder functionality) */}
-            {viewMoreItem && (
-                <PortalModal title="Detalle de la Orden" onClose={() => setViewMoreItem(null)}>
-                    <div className="space-y-4">
+            {/* Mobile Cards */}
+            <div className="md:hidden space-y-4">
+                <h3 className="font-bold text-gray-900 px-1">Historial de Órdenes</h3>
+                {compras.map(c => (
+                    <div key={c.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-3">
                         <div className="flex justify-between items-start">
-                             <div>
-                                <p className="text-xs text-gray-500 uppercase">Material</p>
-                                <p className="font-bold text-gray-900 text-lg">{viewMoreItem.material_nombre}</p>
-                             </div>
-                             <span className={`px-3 py-1 rounded-full text-xs ${getStatusStyle(viewMoreItem.estado)}`}>{viewMoreItem.estado}</span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <p className="text-xs text-gray-500 uppercase">Solicitado</p>
-                                <p className="font-bold">{viewMoreItem.cantidad_pedida} ui</p>
+                                <p className="font-bold text-gray-900">{c.material_nombre}</p>
+                                <p className="text-xs text-gray-500">{new Date(c.fecha_compra).toLocaleDateString('es-MX')}</p>
                             </div>
-                            <div>
-                                <p className="text-xs text-gray-500 uppercase">Llegado</p>
-                                <p className="font-bold text-green-600">{viewMoreItem.cantidad_llegada || '—'}</p>
-                            </div>
+                            <span className={\`px-2 py-1 rounded-full text-[10px] \${getStatusStyle(c.estado)}\`}>
+                                {c.estado}
+                            </span>
                         </div>
-                        <div className="bg-gray-50 p-3 rounded-lg border border-gray-100 italic text-sm">
-                            Proveedor: {viewMoreItem.proveedor || 'N/A'} <br/>
-                            Notas: {viewMoreItem.notas || 'Sin notas.'}
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-500 font-medium">Cantidad: <span className="text-dark font-bold">{c.cantidad_pedida} ui</span></span>
+                            {c.estado === 'PENDIENTE' && (
+                                <button 
+                                    onClick={() => handleCancelar(c.id, c.material_nombre)}
+                                    className="text-red-500 text-xs font-bold border border-red-100 px-3 py-1 rounded-lg hover:bg-red-50"
+                                >
+                                    Cancelar
+                                </button>
+                            )}
                         </div>
-                        <button onClick={() => setViewMoreItem(null)} className="w-full py-2 bg-primary text-white font-bold rounded-xl mt-2">Cerrar</button>
                     </div>
-                </PortalModal>
-            )}
+                ))}
+                {compras.length === 0 && (
+                    <div className="text-center py-8 text-gray-400 bg-white rounded-xl border border-gray-100">
+                        <p className="font-medium">Sin compras registradas aún.</p>
+                    </div>
+                )}
+            </div>
 
             {showModal && (
                 <PortalModal title="Nueva Orden de Compra" onClose={() => setShowModal(false)}>
@@ -213,8 +217,8 @@ export default function AdminCompras() {
                             <textarea className="form-input" name="notas" rows={2} placeholder="Número de presupuesto, urgencia, etc." value={form.notas} onChange={handleChange} />
                         </div>
                         <div className="flex gap-3 pt-2">
-                            <button type="button" onClick={() => setShowModal(false)} className="cancel-btn">Cancelar</button>
-                            <button type="submit" className="login-btn">Crear Orden</button>
+                            <button type="button" onClick={() => setShowModal(false)} className="cancel-btn flex-1">Cancelar</button>
+                            <button type="submit" className="login-btn flex-1">Crear Orden</button>
                         </div>
                     </form>
                 </PortalModal>

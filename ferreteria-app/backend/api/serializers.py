@@ -71,6 +71,7 @@ class MovimientoStockSerializer(serializers.ModelSerializer):
         model = MovimientoStock
         fields = '__all__'
 
+
 class CompraSerializer(serializers.ModelSerializer):
     material_detalle = MaterialSerializer(source='material', read_only=True)
     registrado_por_detalle = UsuarioSerializer(source='registrado_por', read_only=True)
@@ -91,3 +92,4 @@ class HistorialProductoMaloSerializer(serializers.ModelSerializer):
     class Meta:
         model = HistorialProductoMalo
         fields = '__all__'
+

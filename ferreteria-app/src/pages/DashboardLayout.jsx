@@ -30,6 +30,7 @@ const ROLE_NAV_LINKS = {
         { name: 'Disposición del Stock', path: '/oficina-stock', icon: WrenchIcon },
         { name: 'Entregar Material', path: '/', icon: ClipboardDocumentCheckIcon },
         { name: 'Recibir Compras', path: '/recibir-compras', icon: InboxArrowDownIcon },
+        { name: 'Recibir/Devoluciones', path: '/recepcion', icon: InboxArrowDownIcon },
     ],
     ENCARGADO_AREA: [
         { name: 'Solicitudes Pendientes', path: '/', icon: ClipboardDocumentCheckIcon },
@@ -84,7 +85,7 @@ export default function DashboardLayout() {
                 <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
                     {links && links.map((link) => (
                         <NavLink
-                            key={link.path}
+                            key={link.path + link.name}
                             to={link.path}
                             className={({ isActive }) =>
                                 `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
