@@ -68,13 +68,21 @@ export default function EncargadoOficinaDashboard() {
         }
 
         if (selectedSol.material_detalle.categoria === 'UNIDAD') {
-            const total = parseInt(form.cantidad_buena_devuelta) + parseInt(form.cantidad_mala_devuelta);
-            const maxAllowed = parseInt(selectedSol.cantidad_aviso_devolucion || selectedSol.cantidad);
+            const total = (parseInt(form.cantidad_buena_devuelta, 10) || 0) + (parseInt(form.cantidad_mala_devuelta, 10) || 0);
+            const maxAllowed = parseInt(selectedSol.cantidad_aviso_devolucion || selectedSol.cantidad, 10);
             if (total > maxAllowed) {
                 return showToast(`El total (${total}) no puede superar los ${maxAllowed} reportados.`, 'warning');
             }
             if (form.cantidad_mala_devuelta > 0 && !form.motivo_devolucion) {
                 return showToast('Indica por qué hay material en mal estado.', 'warning');
+            }
+        }
+
+        if (selectedSol.material_detalle.categoria === 'CONSUMIBLE') {
+            const val = parseInt(form.cantidad_devuelta, 10) || 0;
+            const maxAllowed = parseInt(selectedSol.cantidad_aviso_devolucion || selectedSol.cantidad, 10);
+            if (val > maxAllowed) {
+                return showToast(`No puedes recibir más de los ${maxAllowed} reportados.`, 'warning');
             }
         }
 
@@ -189,7 +197,7 @@ export default function EncargadoOficinaDashboard() {
                                         className="form-input font-bold text-lg" 
                                         type="number" 
                                         min="0" 
-                                        max={selectedSol.cantidad} 
+                                        max={selectedSol.cantidad_aviso_devolucion} 
                                         value={form.cantidad_devuelta} 
                                         onChange={(e) => setForm({...form, cantidad_devuelta: parseInt(e.target.value, 10)})} 
                                     />
@@ -205,7 +213,7 @@ export default function EncargadoOficinaDashboard() {
                                         className="form-input font-bold border-green-200 focus:ring-green-500" 
                                         type="number" 
                                         min="0" 
-                                        max={selectedSol.cantidad} 
+                                        max={selectedSol.cantidad_aviso_devolucion} 
                                         value={form.cantidad_buena_devuelta} 
                                         onChange={(e) => setForm({...form, cantidad_buena_devuelta: parseInt(e.target.value, 10)})} 
                                     />
@@ -216,7 +224,7 @@ export default function EncargadoOficinaDashboard() {
                                         className="form-input font-bold border-red-200 focus:ring-red-500" 
                                         type="number" 
                                         min="0" 
-                                        max={selectedSol.cantidad} 
+                                        max={selectedSol.cantidad_aviso_devolucion} 
                                         value={form.cantidad_mala_devuelta} 
                                         onChange={(e) => setForm({...form, cantidad_mala_devuelta: parseInt(e.target.value, 10)})} 
                                     />

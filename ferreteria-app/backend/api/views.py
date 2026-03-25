@@ -233,8 +233,8 @@ class SolicitudViewSet(viewsets.ModelViewSet):
             except:
                 return Response({'error': 'Cantidad inválida'}, status=status.HTTP_400_BAD_REQUEST)
 
-            if cant_dev > solicitud.cantidad:
-                return Response({'error': 'No puede devolver más de lo entregado'}, status=status.HTTP_400_BAD_REQUEST)
+            if cant_dev > solicitud.cantidad_aviso_devolucion:
+                return Response({'error': f'No puede recibir más de lo reportado por el empleado ({solicitud.cantidad_aviso_devolucion})'}, status=status.HTTP_400_BAD_REQUEST)
             
             solicitud.cantidad_devuelta = cant_dev
             solicitud.cantidad_buena_devuelta = cant_dev
@@ -248,8 +248,8 @@ class SolicitudViewSet(viewsets.ModelViewSet):
             except:
                 return Response({'error': 'Cantidades inválidas'}, status=status.HTTP_400_BAD_REQUEST)
 
-            if (buena + mala) > solicitud.cantidad:
-                return Response({'error': 'El total no puede superar lo entregado'}, status=status.HTTP_400_BAD_REQUEST)
+            if (buena + mala) > solicitud.cantidad_aviso_devolucion:
+                return Response({'error': f'El total no puede superar lo reportado por el empleado ({solicitud.cantidad_aviso_devolucion})'}, status=status.HTTP_400_BAD_REQUEST)
 
             solicitud.cantidad_devuelta = buena + mala
             solicitud.cantidad_buena_devuelta = buena
