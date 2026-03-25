@@ -41,7 +41,7 @@ export default function EmpleadoSolicitudes() {
         if (!ok) return;
         
         try {
-            await api.post(\`solicitudes/\${id}/cancelar/\`);
+            await api.post(`solicitudes/${id}/cancelar/`);
             showToast('Solicitud cancelada correctamente.', 'success');
             fetchSolicitudes();
         } catch (err) {
@@ -52,7 +52,7 @@ export default function EmpleadoSolicitudes() {
     const handleAvisoDevolucion = async (e) => {
         e.preventDefault();
         try {
-            await api.post(\`solicitudes/\${showAvisoModal.id}/avisar_devolucion/\`, {
+            await api.post(`solicitudes/${showAvisoModal.id}/avisar_devolucion/`, {
                 cantidad_aviso: cantAviso
             });
             showToast('Aviso de devolución enviado al encargado.', 'success');
@@ -110,7 +110,7 @@ export default function EmpleadoSolicitudes() {
                                     <td className="px-6 py-4 text-gray-600 font-bold">{sol.cantidad}</td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col gap-1 items-start">
-                                            <span className={\`px-2.5 py-1 rounded-full text-[10px] font-bold border \${getStatusStyle(sol.estado)}\`}>
+                                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${getStatusStyle(sol.estado)}`}>
                                                 {sol.estado}
                                             </span>
                                             {sol.aviso_devolucion && (
@@ -166,7 +166,7 @@ export default function EmpleadoSolicitudes() {
                                 <p className="font-bold text-gray-900">{sol.material_detalle.nombre}</p>
                                 <p className="text-xs text-gray-500">Fecha: {new Date(sol.fecha_solicitud).toLocaleDateString()}</p>
                             </div>
-                            <span className={\`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border \${getStatusStyle(sol.estado)}\`}>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border ${getStatusStyle(sol.estado)}`}>
                                 {sol.estado}
                             </span>
                         </div>
@@ -190,7 +190,7 @@ export default function EmpleadoSolicitudes() {
                         <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-center">
                             <span className="text-xs font-mono text-gray-500 mb-1 block">ID: #{viewMoreSol.id}</span>
                             <h3 className="text-xl font-bold text-gray-900">{viewMoreSol.material_detalle.nombre}</h3>
-                            <span className={\`inline-block mt-2 px-3 py-1 rounded-full text-xs font-bold border \${getStatusStyle(viewMoreSol.estado)}\`}>
+                            <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-bold border ${getStatusStyle(viewMoreSol.estado)}`}>
                                 {viewMoreSol.estado}
                             </span>
                         </div>

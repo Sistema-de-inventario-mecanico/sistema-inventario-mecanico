@@ -39,8 +39,8 @@ export default function EncargadoOficinaDashboard() {
 
     const handleAction = async (sol, action) => {
         try {
-            await api.post(\`solicitudes/\${sol.id}/\${action}/\`);
-            showToast(\`Solicitud \${action === 'entregar' ? 'entregada' : 'procesada'}\`, 'success');
+            await api.post(`solicitudes/${sol.id}/${action}/`);
+            showToast(`Solicitud ${action === 'entregar' ? 'entregada' : 'procesada'}`, 'success');
             load();
         } catch (err) {
             const msg = err.response?.data?.error || 'Error al procesar';
@@ -71,7 +71,7 @@ export default function EncargadoOficinaDashboard() {
             const total = (parseInt(form.cantidad_buena_devuelta, 10) || 0) + (parseInt(form.cantidad_mala_devuelta, 10) || 0);
             const maxAllowed = parseInt(selectedSol.cantidad_aviso_devolucion || selectedSol.cantidad, 10);
             if (total > maxAllowed) {
-                return showToast(\`El total (\${total}) no puede superar los \${maxAllowed} reportados.\`, 'warning');
+                return showToast(`El total (${total}) no puede superar los ${maxAllowed} reportados.`, 'warning');
             }
             if (form.cantidad_mala_devuelta > 0 && !form.motivo_devolucion) {
                 return showToast('Indica por qué hay material en mal estado.', 'warning');
@@ -82,12 +82,12 @@ export default function EncargadoOficinaDashboard() {
             const val = parseInt(form.cantidad_devuelta, 10) || 0;
             const maxAllowed = parseInt(selectedSol.cantidad_aviso_devolucion || selectedSol.cantidad, 10);
             if (val > maxAllowed) {
-                return showToast(\`No puedes recibir más de los \${maxAllowed} reportados.\`, 'warning');
+                return showToast(`No puedes recibir más de los ${maxAllowed} reportados.`, 'warning');
             }
         }
 
         try {
-            await api.post(\`solicitudes/\${selectedSol.id}/devolver/\`, form);
+            await api.post(`solicitudes/${selectedSol.id}/devolver/`, form);
             showToast('Devolución registrada correctamente.', 'success');
             setSelectedSol(null);
             load();
@@ -123,14 +123,14 @@ export default function EncargadoOficinaDashboard() {
                 <div className="flex bg-gray-100 p-1 rounded-xl">
                     <button 
                         onClick={() => setTab('entregar')}
-                        className={\`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all \${tab === 'entregar' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}\`}
+                        className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${tab === 'entregar' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                     >
                         <InboxArrowDownIcon className="w-4 h-4" />
                         Por Entregar ({porEntregar.length})
                     </button>
                     <button 
                         onClick={() => setTab('recibir')}
-                        className={\`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all \${tab === 'recibir' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}\`}
+                        className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${tab === 'recibir' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                     >
                         <ArrowPathIcon className="w-4 h-4" />
                         Por Recibir ({porRecibir.length})
@@ -159,7 +159,7 @@ export default function EncargadoOficinaDashboard() {
             </div>
 
             {selectedSol && (
-                <PortalModal title={\`Recibir Devolución: \${selectedSol.material_detalle.nombre}\`} onClose={() => setSelectedSol(null)}>
+                <PortalModal title={`Recibir Devolución: ${selectedSol.material_detalle.nombre}`} onClose={() => setSelectedSol(null)}>
                     <form onSubmit={handleDevolver} className="space-y-4">
                         <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm">
                             <p><strong>Empleado:</strong> {selectedSol.empleado_detalle.username}</p>
@@ -180,7 +180,7 @@ export default function EncargadoOficinaDashboard() {
                                             key={est}
                                             type="button"
                                             onClick={() => setForm({...form, estado_devolucion: est})}
-                                            className={\`py-2 text-[10px] font-bold rounded-lg border transition-all \${form.estado_devolucion === est ? 'bg-primary border-primary text-white' : 'bg-white border-gray-200 text-gray-500'}\`}
+                                            className={`py-2 text-[10px] font-bold rounded-lg border transition-all ${form.estado_devolucion === est ? 'bg-primary border-primary text-white' : 'bg-white border-gray-200 text-gray-500'}`}
                                         >
                                             {est}
                                         </button>
@@ -237,7 +237,7 @@ export default function EncargadoOficinaDashboard() {
                                 Observaciones { (form.estado_devolucion === 'MALO' || form.cantidad_mala_devuelta > 0) && '(Requerido)'}
                             </label>
                             <textarea 
-                                className={\`form-input focus:ring-primary \${ (form.estado_devolucion === 'MALO' || form.cantidad_mala_devuelta > 0) ? 'border-red-300' : ''}\`}
+                                className={`form-input focus:ring-primary ${ (form.estado_devolucion === 'MALO' || form.cantidad_mala_devuelta > 0) ? 'border-red-300' : ''}`}
                                 rows={2}
                                 value={form.motivo_devolucion}
                                 onChange={(e) => setForm({...form, motivo_devolucion: e.target.value})}
@@ -268,7 +268,7 @@ export default function EncargadoOficinaDashboard() {
 function ItemCard({ sol, actionText, onAction, type }) {
     const isAvise = sol.aviso_devolucion;
     return (
-        <div className={\`bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 hover:border-gray-300 transition-all \${isAvise ? 'ring-2 ring-indigo-100 border-indigo-200' : ''}\`}>
+        <div className={`bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 hover:border-gray-300 transition-all ${isAvise ? 'ring-2 ring-indigo-100 border-indigo-200' : ''}`}>
             <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                     <span className="text-[10px] font-mono text-gray-400">#{sol.id}</span>
@@ -283,7 +283,7 @@ function ItemCard({ sol, actionText, onAction, type }) {
             </div>
             <button 
                 onClick={onAction}
-                className={\`w-full md:w-auto px-6 py-2.5 rounded-xl font-bold shadow-sm transition-all text-sm flex items-center justify-center gap-2 \${type === 'entregar' ? 'bg-primary text-white hover:bg-primary-dark' : 'bg-indigo-600 text-white hover:bg-indigo-700'}\`}
+                className={`w-full md:w-auto px-6 py-2.5 rounded-xl font-bold shadow-sm transition-all text-sm flex items-center justify-center gap-2 ${type === 'entregar' ? 'bg-primary text-white hover:bg-primary-dark' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
             >
                 {type === 'recibir' ? <ArrowPathIcon className="w-4 h-4" /> : <CheckBadgeIcon className="w-4 h-4" />}
                 {actionText}

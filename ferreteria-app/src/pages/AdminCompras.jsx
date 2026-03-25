@@ -37,7 +37,7 @@ export default function AdminCompras() {
 
         const ok = await confirmDialog(
             'Confirmar Compra',
-            \`¿Estás seguro de registrar esta orden de compra por \${form.cantidad_pedida} unidades de \${mat.nombre}?\`
+            `¿Estás seguro de registrar esta orden de compra por ${form.cantidad_pedida} unidades de ${mat.nombre}?`
         );
         if (!ok) return;
 
@@ -49,7 +49,7 @@ export default function AdminCompras() {
                 notas: form.notas,
             });
             setShowModal(false);
-            showToast(\`Orden de compra para "\${mat.nombre}" registrada. Pendiente de recibir por oficina.\`, 'success');
+            showToast(`Orden de compra para "${mat.nombre}" registrada. Pendiente de recibir por oficina.`, 'success');
             setForm({ material: '', cantidad_pedida: 1, proveedor: '', notas: '' });
             load();
         } catch (err) {
@@ -61,12 +61,12 @@ export default function AdminCompras() {
     const handleCancelar = async (id, nombre) => {
         const ok = await confirmDialog(
             'Cancelar Orden',
-            \`¿Estás seguro de cancelar la orden de compra de "\${nombre}"? Esta acción no se puede deshacer.\`
+            `¿Estás seguro de cancelar la orden de compra de "${nombre}"? Esta acción no se puede deshacer.`
         );
         if (!ok) return;
 
         try {
-            await api.post(\`compras/\${id}/cancelar/\`);
+            await api.post(`compras/${id}/cancelar/`);
             showToast('Orden de compra cancelada.', 'success');
             load();
         } catch (err) {
@@ -104,7 +104,7 @@ export default function AdminCompras() {
                 {materiales.slice(0, 4).map(m => (
                     <div key={m.id} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
                         <p className="text-xs text-gray-500 uppercase font-semibold tracking-wide truncate">{m.nombre}</p>
-                        <p className={\`text-3xl font-bold mt-1 \${m.stock_actual <= m.stock_min ? 'text-red-500' : 'text-dark'}\`}>{m.stock_actual}</p>
+                        <p className={`text-3xl font-bold mt-1 ${m.stock_actual <= m.stock_min ? 'text-red-500' : 'text-dark'}`}>{m.stock_actual}</p>
                         <p className="text-xs text-gray-400 mt-0.5">Mín: {m.stock_min}</p>
                     </div>
                 ))}
@@ -132,12 +132,12 @@ export default function AdminCompras() {
                                 <td className="px-6 py-4 font-medium text-gray-900">{c.material_nombre}</td>
                                 <td className="px-6 py-4 font-bold text-gray-700">{c.cantidad_pedida}</td>
                                 <td className="px-6 py-4 text-xs font-bold">
-                                    <span className={\`px-2 py-1 rounded-full text-[10px] \${getStatusStyle(c.estado)}\`}>
+                                    <span className={`px-2 py-1 rounded-full text-[10px] ${getStatusStyle(c.estado)}`}>
                                         {c.estado}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-gray-500 text-xs">{new Date(c.fecha_compra).toLocaleString('es-MX')}</td>
-                                <td className="px-6 py-4 text-gray-400 text-sm max-w-xs truncate">{c.proveedor || '—'} {c.notes && \` | \${c.notes}\`}</td>
+                                <td className="px-6 py-4 text-gray-400 text-sm max-w-xs truncate">{c.proveedor || '—'} {c.notes && ` | ${c.notes}`}</td>
                                 <td className="px-6 py-4 text-center">
                                     {c.estado === 'PENDIENTE' && (
                                         <button 
@@ -166,7 +166,7 @@ export default function AdminCompras() {
                                 <p className="font-bold text-gray-900">{c.material_nombre}</p>
                                 <p className="text-xs text-gray-500">{new Date(c.fecha_compra).toLocaleDateString('es-MX')}</p>
                             </div>
-                            <span className={\`px-2 py-1 rounded-full text-[10px] \${getStatusStyle(c.estado)}\`}>
+                            <span className={`px-2 py-1 rounded-full text-[10px] ${getStatusStyle(c.estado)}`}>
                                 {c.estado}
                             </span>
                         </div>

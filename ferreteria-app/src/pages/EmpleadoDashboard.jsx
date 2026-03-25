@@ -32,7 +32,7 @@ export default function EmpleadoDashboard() {
     const openConfirmModal = (mat) => {
         const cantidad = getCantidad(mat);
         if (cantidad < 1 || cantidad > mat.stock_actual) {
-            showToast(\`Cantidad inválida. Stock disponible: \${mat.stock_actual}\`, 'warning');
+            showToast(`Cantidad inválida. Stock disponible: ${mat.stock_actual}`, 'warning');
             return;
         }
         setSelectedMaterial({ mat, cantidad });
@@ -43,7 +43,7 @@ export default function EmpleadoDashboard() {
         const { mat, cantidad } = selectedMaterial;
         try {
             await api.post('solicitudes/', { material: mat.id, cantidad });
-            showToast(\`¡Solicitud de \${cantidad} × "\${mat.nombre}" enviada! Revisa el estado en "Mis Solicitudes".\`, 'success');
+            showToast(`¡Solicitud de ${cantidad} × "${mat.nombre}" enviada! Revisa el estado en "Mis Solicitudes".`, 'success');
             setSelectedMaterial(null);
             loadData();
         } catch (error) {
@@ -78,11 +78,11 @@ export default function EmpleadoDashboard() {
                     return (
                         <div key={mat.id} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col hover:shadow-md transition-shadow">
                             <div className="flex justify-between items-start mb-4">
-                                <span className={\`text-xs font-semibold px-2.5 py-1 rounded-full \${catColors[mat.categoria]}\`}>
+                                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${catColors[mat.categoria]}`}>
                                     {mat.categoria}
                                 </span>
-                                <span className={\`text-sm font-bold \${agotado ? 'text-red-500' : 'text-green-600'}\`}>
-                                    {agotado ? 'Agotado' : \`\${mat.stock_actual} disp.\`}
+                                <span className={`text-sm font-bold ${agotado ? 'text-red-500' : 'text-green-600'}`}>
+                                    {agotado ? 'Agotado' : `${mat.stock_actual} disp.`}
                                 </span>
                             </div>
 
@@ -110,16 +110,16 @@ export default function EmpleadoDashboard() {
                             <button
                                 onClick={() => openConfirmModal(mat)}
                                 disabled={agotado}
-                                className={\`w-full flex items-center justify-center space-x-2 py-2.5 rounded-xl font-medium text-sm transition-colors \${
+                                className={`w-full flex items-center justify-center space-x-2 py-2.5 rounded-xl font-medium text-sm transition-colors ${
                                     agotado
                                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                         : 'bg-primary/10 text-primary hover:bg-primary hover:text-white'
-                                }\`}
+                                }`}
                             >
                                 <PlusIcon className="w-4 h-4" />
                                 <span>
                                     {canSelectQty
-                                        ? \`Solicitar \${cantidad} \${mat.categoria === 'UNIDAD' ? 'pcs.' : 'u.'}\`
+                                        ? `Solicitar ${cantidad} ${mat.categoria === 'UNIDAD' ? 'pcs.' : 'u.'}`
                                         : 'Solicitar'}
                                 </span>
                             </button>
