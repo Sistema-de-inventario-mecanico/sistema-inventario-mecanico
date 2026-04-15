@@ -13,6 +13,8 @@ import AdminStock from './pages/AdminStock';
 import AdminControl from './pages/AdminControl';
 import AdminCompras from './pages/AdminCompras';
 import OficinaStock from './pages/OficinaStock';
+import OficinaRecibirCompras from './pages/OficinaRecibirCompras';
+import AdminHistorialMalos from './pages/AdminHistorialMalos';
 
 // Placeholder Pages
 const NotImplemented = () => <div className="p-8 bg-white rounded-xl shadow text-center"><h2 className="text-2xl font-bold text-gray-700">Página en Construcción</h2><p className="text-gray-500 mt-2">Esta vista será implementada en el siguiente paso.</p></div>;
@@ -52,6 +54,8 @@ export default function App() {
                         <Route path="stock" element={<AdminStock />} />
                         <Route path="control" element={<AdminControl />} />
                         <Route path="compras" element={<AdminCompras />} />
+                        <Route path="recibir-compras" element={<OficinaRecibirCompras />} />
+                        <Route path="historial-defectos" element={<AdminHistorialMalos />} />
                         <Route path="usuarios" element={<AdminUsuarios />} />
                         <Route path="encargado-oficina" element={<EncargadoOficinaDashboard />} />
                         <Route path="encargado-area" element={<EncargadoAreaDashboard />} />

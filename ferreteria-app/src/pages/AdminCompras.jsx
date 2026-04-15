@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
-import { ShoppingCartIcon, CheckIcon } from '@heroicons/react/24/outline';
-import { PortalModal, useToast } from '../components/Toast';
+import { ShoppingCartIcon, CheckIcon, ClockIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PortalModal, useToast, useConfirm } from '../components/Toast';
 
 export default function AdminCompras() {
     const { showToast, ToastContainer } = useToast();
+    const { confirmDialog, ConfirmDialogContainer } = useConfirm();
     const [materiales, setMateriales] = useState([]);
-    const [movimientos, setMovimientos] = useState([]);
+    const [compras, setCompras] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [viewMoreItem, setViewMoreItem] = useState(null);
-    const [form, setForm] = useState({ material: '', cantidad: 1, proveedor: '', notas: '' });
+    const [form, setForm] = useState({ material: '', cantidad_pedida: 1, proveedor: '', notas: '' });
 
     const load = async () => {
         try {
-            const [mat, mov] = await Promise.all([api.get('materiales/'), api.get('movimientos/')]);
+            const [mat, com] = await Promise.all([api.get('materiales/'), api.get('compras/')]);
             setMateriales(mat.data);
-            setMovimientos(mov.data.filter(m => m.tipo === 'INGRESO'));
+            setCompras(com.data);
         } catch (e) { console.error(e); }
         finally { setLoading(false); }
     };
@@ -34,38 +35,68 @@ export default function AdminCompras() {
         const mat = materiales.find(m => m.id === parseInt(form.material));
         if (!mat) return showToast('Selecciona un material.', 'warning');
 
-        const cantidad = parseInt(form.cantidad, 10);
-        const notas = [form.proveedor && `Proveedor: ${form.proveedor}`, form.notas].filter(Boolean).join(' | ');
+        const ok = await confirmDialog(
+            'Confirmar Compra',
+            `¿Estás seguro de registrar esta orden de compra por ${form.cantidad_pedida} unidades de ${mat.nombre}?`
+        );
+        if (!ok) return;
 
         try {
-            await api.post(`materiales/${mat.id}/ajustar_stock/`, {
-                tipo: 'INGRESO',
-                cantidad,
-                notas,
+            await api.post('compras/', {
+                material: mat.id,
+                cantidad_pedida: parseInt(form.cantidad_pedida, 10),
+                proveedor: form.proveedor,
+                notas: form.notas,
             });
             setShowModal(false);
-            showToast(`Compra registrada. Stock de "${mat.nombre}" actualizado.`, 'success');
-            setForm({ material: '', cantidad: 1, proveedor: '', notas: '' });
+            showToast(`Orden de compra para "${mat.nombre}" registrada. Pendiente de recibir por oficina.`, 'success');
+            setForm({ material: '', cantidad_pedida: 1, proveedor: '', notas: '' });
             load();
         } catch (err) {
-            showToast('Error al registrar compra.', 'error');
+            showToast('Error al registrar orden de compra.', 'error');
             console.error(err);
         }
     };
 
-    if (loading) return <div className="p-10 text-center text-gray-500">Cargando...</div>;
+    const handleCancelar = async (id, nombre) => {
+        const ok = await confirmDialog(
+            'Cancelar Orden',
+            `¿Estás seguro de cancelar la orden de compra de "${nombre}"? Esta acción no se puede deshacer.`
+        );
+        if (!ok) return;
+
+        try {
+            await api.post(`compras/${id}/cancelar/`);
+            showToast('Orden de compra cancelada.', 'success');
+            load();
+        } catch (err) {
+            showToast('Error al cancelar la orden.', 'error');
+        }
+    };
+
+    const getStatusStyle = (status) => {
+        switch (status) {
+            case 'PENDIENTE': return 'bg-amber-100 text-amber-700 font-bold';
+            case 'RECIBIDA': return 'bg-green-100 text-green-700 font-bold';
+            case 'CANCELADA': return 'bg-red-100 text-red-700 font-bold';
+            default: return 'bg-gray-100 text-gray-500';
+        }
+    };
+
+    if (loading) return <div className="p-10 text-center text-gray-500">Cargando compras...</div>;
 
     return (
         <div className="space-y-6">
             <ToastContainer />
+            <ConfirmDialogContainer />
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-2xl font-bold text-dark">Compras de Material</h2>
-                    <p className="text-gray-500 text-sm mt-1">Registra nuevas compras para reponer el inventario.</p>
+                    <h2 className="text-2xl font-bold text-dark">Gestión de Compras</h2>
+                    <p className="text-gray-500 text-sm mt-1">Crea órdenes de compra que el encargado de oficina recibirá físicamente.</p>
                 </div>
                 <button onClick={() => setShowModal(true)} className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg flex items-center space-x-2 shadow-sm transition-colors font-medium text-sm">
                     <ShoppingCartIcon className="w-5 h-5" />
-                    <span>Nueva Compra</span>
+                    <span>Nueva Orden de Compra</span>
                 </button>
             </div>
 
@@ -79,135 +110,115 @@ export default function AdminCompras() {
                 ))}
             </div>
 
-            {/* Desktop Table View */}
+            {/* Desktop Table */}
             <div className="hidden md:block bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100">
-                    <h3 className="font-semibold text-dark">Historial de Compras</h3>
+                    <h3 className="font-semibold text-dark">Historial de Órdenes</h3>
                 </div>
                 <table className="w-full text-sm text-left">
                     <thead className="bg-gray-50 border-b border-gray-100 text-xs uppercase text-gray-500 font-semibold">
                         <tr>
                             <th className="px-6 py-4">Material</th>
-                            <th className="px-6 py-4">Cantidad</th>
-                            <th className="px-6 py-4">Registrado por</th>
-                            <th className="px-6 py-4">Fecha</th>
-                            <th className="px-6 py-4">Notas / Proveedor</th>
+                            <th className="px-6 py-4">Cantidad Pedida</th>
+                            <th className="px-6 py-4">Estado</th>
+                            <th className="px-6 py-4">Fecha Pedido</th>
+                            <th className="px-6 py-4">Proveedor / Notas</th>
+                            <th className="px-6 py-4 text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                        {movimientos.map(mov => (
-                            <tr key={mov.id} className="hover:bg-gray-50/50">
-                                <td className="px-6 py-4 font-medium text-gray-900">{mov.material_detalle?.nombre || `Material #${mov.material}`}</td>
-                                <td className="px-6 py-4">
-                                    <span className="inline-flex items-center gap-1 text-green-700 font-bold">
-                                        <CheckIcon className="w-4 h-4" />+{mov.cantidad}
+                        {compras.map(c => (
+                            <tr key={c.id} className="hover:bg-gray-50/50 transition-colors">
+                                <td className="px-6 py-4 font-medium text-gray-900">{c.material_nombre}</td>
+                                <td className="px-6 py-4 font-bold text-gray-700">{c.cantidad_pedida}</td>
+                                <td className="px-6 py-4 text-xs font-bold">
+                                    <span className={`px-2 py-1 rounded-full text-[10px] ${getStatusStyle(c.estado)}`}>
+                                        {c.estado}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 font-mono text-xs text-gray-600">{mov.usuario_detalle?.username || '—'}</td>
-                                <td className="px-6 py-4 text-gray-500 text-xs">{new Date(mov.fecha).toLocaleString('es-MX')}</td>
-                                <td className="px-6 py-4 text-gray-400 text-sm max-w-xs truncate">{mov.notas || '—'}</td>
+                                <td className="px-6 py-4 text-gray-500 text-xs">{new Date(c.fecha_compra).toLocaleString('es-MX')}</td>
+                                <td className="px-6 py-4 text-gray-400 text-sm max-w-xs truncate">{c.proveedor || '—'} {c.notes && ` | ${c.notes}`}</td>
+                                <td className="px-6 py-4 text-center">
+                                    {c.estado === 'PENDIENTE' && (
+                                        <button 
+                                            onClick={() => handleCancelar(c.id, c.material_nombre)}
+                                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                            title="Cancelar Compra"
+                                        >
+                                            <XMarkIcon className="w-5 h-5" />
+                                        </button>
+                                    )}
+                                </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
-                {movimientos.length === 0 && (
-                    <div className="text-center py-12 text-gray-400">Sin compras registradas aún.</div>
-                )}
+                {compras.length === 0 && <div className="text-center py-12 text-gray-400">Sin órdenes registradas.</div>}
             </div>
 
             {/* Mobile Cards */}
             <div className="md:hidden space-y-4">
-                <h3 className="font-bold text-gray-900 px-1">Historial de Compras</h3>
-                {movimientos.map(mov => (
-                    <div key={mov.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-3">
+                <h3 className="font-bold text-gray-900 px-1">Historial de Órdenes</h3>
+                {compras.map(c => (
+                    <div key={c.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-3">
                         <div className="flex justify-between items-start">
                             <div>
-                                <p className="font-bold text-gray-900">{mov.material_detalle?.nombre || `Material #${mov.material}`}</p>
-                                <p className="text-xs text-gray-500">{new Date(mov.fecha).toLocaleDateString('es-MX')}</p>
+                                <p className="font-bold text-gray-900">{c.material_nombre}</p>
+                                <p className="text-xs text-gray-500">{new Date(c.fecha_compra).toLocaleDateString('es-MX')}</p>
                             </div>
-                            <span className="inline-flex items-center gap-1 text-green-700 font-bold bg-green-50 px-2 py-1 rounded">
-                                <CheckIcon className="w-4 h-4" />+{mov.cantidad}
+                            <span className={`px-2 py-1 rounded-full text-[10px] ${getStatusStyle(c.estado)}`}>
+                                {c.estado}
                             </span>
                         </div>
-                        <button 
-                            onClick={() => setViewMoreItem(mov)}
-                            className="w-full py-2 bg-gray-50 hover:bg-gray-100 text-primary font-medium rounded-lg text-sm border border-gray-200"
-                        >
-                            Ver Detalles
-                        </button>
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-500 font-medium">Cantidad: <span className="text-dark font-bold">{c.cantidad_pedida} ui</span></span>
+                            {c.estado === 'PENDIENTE' && (
+                                <button 
+                                    onClick={() => handleCancelar(c.id, c.material_nombre)}
+                                    className="text-red-500 text-xs font-bold border border-red-100 px-3 py-1 rounded-lg hover:bg-red-50"
+                                >
+                                    Cancelar
+                                </button>
+                            )}
+                        </div>
                     </div>
                 ))}
-                {movimientos.length === 0 && (
+                {compras.length === 0 && (
                     <div className="text-center py-8 text-gray-400 bg-white rounded-xl border border-gray-100">
                         <p className="font-medium">Sin compras registradas aún.</p>
                     </div>
                 )}
             </div>
 
-            {/* View More Modal */}
-            {viewMoreItem && (
-                <PortalModal title="Detalle de Compra" onClose={() => setViewMoreItem(null)}>
-                    <div className="space-y-4">
-                        <div>
-                            <p className="text-sm text-gray-500">Material</p>
-                            <p className="font-bold text-gray-900">{viewMoreItem.material_detalle?.nombre || `Material #${viewMoreItem.material}`}</p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <p className="text-sm text-gray-500">Cantidad</p>
-                                <p className="font-bold text-green-700">+{viewMoreItem.cantidad} unidades</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Fecha</p>
-                                <p className="font-medium">{new Date(viewMoreItem.fecha).toLocaleString('es-MX')}</p>
-                            </div>
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-500">Registrado por</p>
-                            <p className="font-medium text-gray-900">{viewMoreItem.usuario_detalle?.username || '—'}</p>
-                        </div>
-                        <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                            <p className="text-sm text-gray-500 mb-1">Notas / Proveedor</p>
-                            <p className="text-sm text-gray-800">{viewMoreItem.notas || 'Sin notas adicionales.'}</p>
-                        </div>
-                        <div className="pt-2">
-                            <button onClick={() => setViewMoreItem(null)} className="w-full py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors">
-                                Cerrar
-                            </button>
-                        </div>
-                    </div>
-                </PortalModal>
-            )}
-
             {showModal && (
-                <PortalModal title="Registrar Nueva Compra" onClose={() => setShowModal(false)}>
+                <PortalModal title="Nueva Orden de Compra" onClose={() => setShowModal(false)}>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Material a reabastecer</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Material a pedir</label>
                             <select className="form-input bg-white" name="material" required value={form.material} onChange={handleChange}>
                                 <option value="">-- Seleccionar material --</option>
                                 {materiales.map(m => (
                                     <option key={m.id} value={m.id}>
-                                        {m.nombre} — Stock actual: {m.stock_actual} {m.stock_actual <= m.stock_min ? '⚠ BAJO' : ''}
+                                        {m.nombre} (Stock: {m.stock_actual})
                                     </option>
                                 ))}
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad comprada</label>
-                            <input className="form-input" type="number" name="cantidad" min="1" required value={form.cantidad} onChange={handleChange} />
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad a comprar</label>
+                            <input className="form-input" type="number" name="cantidad_pedida" min="1" required value={form.cantidad_pedida} onChange={handleChange} />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor (opcional)</label>
-                            <input className="form-input" type="text" name="proveedor" placeholder="Ej. Ferretería el Torno S.A." value={form.proveedor} onChange={handleChange} />
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor sugerido</label>
+                            <input className="form-input" type="text" name="proveedor" placeholder="Nombre de la ferretería" value={form.proveedor} onChange={handleChange} />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Notas adicionales</label>
-                            <textarea className="form-input" name="notas" rows={2} placeholder="Número de factura, observaciones..." value={form.notas} onChange={handleChange} />
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Notas para almacén</label>
+                            <textarea className="form-input" name="notas" rows={2} placeholder="Número de presupuesto, urgencia, etc." value={form.notas} onChange={handleChange} />
                         </div>
                         <div className="flex gap-3 pt-2">
-                            <button type="button" onClick={() => setShowModal(false)} className="cancel-btn">Cancelar</button>
-                            <button type="submit" className="login-btn">Registrar Compra</button>
+                            <button type="button" onClick={() => setShowModal(false)} className="cancel-btn flex-1">Cancelar</button>
+                            <button type="submit" className="login-btn flex-1">Crear Orden</button>
                         </div>
                     </form>
                 </PortalModal>

@@ -143,9 +143,9 @@ export default function EmpleadoDashboard() {
                             ¿Estás seguro de que deseas solicitar <strong>{selectedMaterial.cantidad} {selectedMaterial.mat.categoria === 'UNIDAD' ? 'pcs.' : 'u.'}</strong> de <strong>{selectedMaterial.mat.nombre}</strong>?
                         </p>
                         <div className="flex gap-3 pt-4">
-                            <button onClick={() => setSelectedMaterial(null)} className="cancel-btn">Cancelar</button>
-                            <button onClick={confirmarSolicitud} className="login-btn bg-primary hover:bg-primary-dark">
-                                Confirmar Solicitud
+                            <button onClick={() => setSelectedMaterial(null)} className="cancel-btn flex-1">Cancelar</button>
+                            <button onClick={confirmarSolicitud} className="login-btn flex-1">
+                                Confirmar
                             </button>
                         </div>
                     </div>

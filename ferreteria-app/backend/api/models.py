@@ -58,6 +58,7 @@ class EstadoSolicitud(models.TextChoices):
     RECHAZADA = 'RECHAZADA', 'Rechazada'
     ENTREGADA = 'ENTREGADA', 'Entregada'
     DEVUELTA = 'DEVUELTA', 'Devuelta'
+    CANCELADA = 'CANCELADA', 'Cancelada'
 
 class EstadoDevolucion(models.TextChoices):
     BUENO = 'BUENO', 'Bueno'
@@ -78,6 +79,7 @@ class Solicitud(models.Model):
     fecha_aprobacion = models.DateTimeField(null=True, blank=True)
     fecha_entrega = models.DateTimeField(null=True, blank=True)
     fecha_devolucion = models.DateTimeField(null=True, blank=True)
+    fecha_cancelacion = models.DateTimeField(null=True, blank=True)
 
     encargado_area = models.ForeignKey(
         Usuario, related_name='solicitudes_aprobadas', 
@@ -94,6 +96,14 @@ class Solicitud(models.Model):
         null=True, blank=True
     )
     motivo_devolucion = models.TextField(blank=True)
+    cantidad_devuelta = models.IntegerField(null=True, blank=True)
+    cantidad_buena_devuelta = models.IntegerField(null=True, blank=True)
+    cantidad_mala_devuelta = models.IntegerField(null=True, blank=True)
+
+    # Aviso de devolución de consumibles/unidades (iniciado por el empleado)
+    aviso_devolucion = models.BooleanField(default=False)
+    cantidad_aviso_devolucion = models.IntegerField(null=True, blank=True)
+    fecha_aviso_devolucion = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Solicitud {self.id} - {self.material.nombre} por {self.empleado.username}"
@@ -112,3 +122,71 @@ class MovimientoStock(models.Model):
 
     def __str__(self):
         return f"{self.tipo} - {self.material.nombre} ({self.cantidad})"
+
+class EstadoCompra(models.TextChoices):
+    PENDIENTE = 'PENDIENTE', 'Pendiente de recibir'
+    RECIBIDA = 'RECIBIDA', 'Recibida'
+    CANCELADA = 'CANCELADA', 'Cancelada'
+
+class Compra(models.Model):
+    material = models.ForeignKey(Material, related_name='compras', on_delete=models.SET_NULL, null=True)
+    material_nombre = models.CharField(max_length=200, blank=True)  # preserve even if material deleted
+    cantidad_pedida = models.IntegerField()
+    cantidad_llegada = models.IntegerField(default=0)
+    cantidad_buena = models.IntegerField(default=0)
+    cantidad_regular = models.IntegerField(default=0)
+    cantidad_mala = models.IntegerField(default=0)
+    proveedor = models.CharField(max_length=200, blank=True)
+    notas = models.TextField(blank=True)
+    estado = models.CharField(
+        max_length=20,
+        choices=EstadoCompra.choices,
+        default=EstadoCompra.PENDIENTE
+    )
+    fecha_compra = models.DateTimeField(auto_now_add=True)
+    registrado_por = models.ForeignKey(
+        Usuario, related_name='compras_registradas',
+        on_delete=models.SET_NULL, null=True
+    )
+
+    comentario_malo = models.TextField(blank=True)
+    fecha_recepcion = models.DateTimeField(null=True, blank=True)
+    recibido_por = models.ForeignKey(
+        Usuario, related_name='compras_recibidas',
+        on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    def save(self, *args, **kwargs):
+        if self.material and not self.material_nombre:
+            self.material_nombre = self.material.nombre
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Compra {self.id} - {self.material_nombre} ({self.estado})"
+
+class HistorialProductoMalo(models.Model):
+    """Keeps a permanent record of defective items, even if the material is deleted."""
+    material = models.ForeignKey(
+        Material, related_name='historial_malos',
+        on_delete=models.SET_NULL, null=True, blank=True
+    )
+    material_nombre = models.CharField(max_length=200)  # preserved copy
+    material_categoria = models.CharField(max_length=20, blank=True)  # preserved copy
+    solicitud = models.ForeignKey(
+        Solicitud, related_name='historial_malos',
+        on_delete=models.SET_NULL, null=True, blank=True
+    )
+    compra = models.ForeignKey(
+        Compra, related_name='historial_malos',
+        on_delete=models.SET_NULL, null=True, blank=True
+    )
+    cantidad = models.IntegerField()
+    comentario = models.TextField(blank=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+    reportado_por = models.ForeignKey(
+        Usuario, related_name='reportes_malos',
+        on_delete=models.SET_NULL, null=True
+    )
+
+    def __str__(self):
+        return f"Defecto {self.id} - {self.material_nombre} ({self.cantidad})"

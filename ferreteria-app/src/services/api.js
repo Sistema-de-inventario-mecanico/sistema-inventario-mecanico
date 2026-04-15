@@ -9,7 +9,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
     (config) => {
-        const token = sessionStorage.getItem('access_token');
+        const token = localStorage.getItem('access_token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -30,18 +30,20 @@ api.interceptors.response.use(
         ) {
             originalRequest._retry = true;
             try {
-                const refreshToken = sessionStorage.getItem('refresh_token');
+                const refreshToken = localStorage.getItem('refresh_token');
                 const response = await axios.post('/api/token/refresh/', {
                     refresh: refreshToken
                 });
                 const { access } = response.data;
-                sessionStorage.setItem('access_token', access);
+                localStorage.setItem('access_token', access);
                 
                 originalRequest.headers.Authorization = `Bearer ${access}`;
                 return api(originalRequest);
             } catch (err) {
-                sessionStorage.removeItem('access_token');
-                sessionStorage.removeItem('refresh_token');
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                localStorage.removeItem('user');
+                localStorage.removeItem('login_date');
                 window.location.href = '/login';
             }
         }
